@@ -1,0 +1,185 @@
+﻿@{
+    ViewData["Title"] = "Sports Teams";
+}
+
+<script src="\tempremove\nba_team.js"></script>
+
+<div class="row mt-5">
+    <div class="col-xs-12 col-md-3 team-list">
+        <ul class="list-group" id="teams">
+        </ul>
+      
+    </div>
+    <div class="col-xs-12 col-md-9">
+        <ul class="nav nav-tabs" id="teamTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info-tab-pane" type="button" role="tab" aria-controls="info-tab-pane" aria-selected="true">Info</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#games-tab-pane" type="button" role="tab" aria-controls="games-tab-pane" aria-selected="false">Games</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#players-tab-pane" type="button" role="tab" aria-controls="players-tab-pane" aria-selected="false">Players</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="info-tab-pane" role="tabpanel" aria-labelledby="info-tab-pane" tabindex="0">
+                <div class="row mt-4">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                team info
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                team info
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="tab-pane fade" id="games-tab-pane" role="tabpanel" aria-labelledby="games-tab" tabindex="0">
+                <table class="table table-striped table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th>
+                                Game Data
+                            </th>
+                            <th>
+                                Game Data
+                            </th>
+                            <th>
+                                Game Data
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="tab-pane fade" id="players-tab-pane" role="tabpanel" aria-labelledby="players-tab" tabindex="0">
+                <table class="table table-striped table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th>
+                                Player Data
+                            </th>
+                            <th>
+                                Player Data
+                            </th>
+                            <th>
+                                Player DatA
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                            <td>
+                                add data
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            
+        </div>
+    </div>
+</div>
+<script>
+    console.log(NBA_TEAM);
+    let teamList = document.getElementById('teams');
+    let listItems ='';
+    for(let team of NBA_TEAM){
+    listItems += `<a href='#' class='list-group-item list-group-item-action'><img src='${team.logo}' class='img-thumbnail list-logo' />${team.name}</a>`;
+    }
+    teamList.innerHTML = listItems;
+</script>

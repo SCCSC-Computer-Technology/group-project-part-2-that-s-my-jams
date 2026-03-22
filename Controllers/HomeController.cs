@@ -24,6 +24,11 @@ namespace MVCSportsApp.Controllers
             return View();
         }
 
+        public IActionResult NBA()
+        {
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
