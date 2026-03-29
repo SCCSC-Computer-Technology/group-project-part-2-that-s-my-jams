@@ -6,6 +6,8 @@ namespace MVCSportsApp.Models.NFL
     {
         [JsonProperty("TeamID")]
         public int TeamID { get; set; }
+        // The "Team" property is not part of the JSON response, but we can use it to store the team name for easier access in our views.
+        public string Team { get; set; }
 
         [JsonProperty("Key")]
         public string Key { get; set; } = "";
