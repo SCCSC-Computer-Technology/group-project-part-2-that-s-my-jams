@@ -1,14 +1,9 @@
 const NBA_TEAM = [
   {
     "id": 132,
+    "key": "ATL",
     "name": "Atlanta Hawks",
     "logo": "https://media.api-sports.io/basketball/teams/132.png",
-    "winds": 40,
-    "draws": 0,
-    "loses": 46,
-    "pointsFor": 10120,
-    "pointsAgainst": 10275,
-    "position": 1
   },
   {
     "id": 133,

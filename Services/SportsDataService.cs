@@ -73,5 +73,84 @@ namespace MVCSportsApp.Services
         public Task<List<NFLPlayerSeasonStat>> GetNFLPlayerSeasonStatsAsync()
             => GetAsync<List<NFLPlayerSeasonStat>>($"https://api.sportsdata.io/v3/nfl/scores/json/PlayerSeasonStats/{NFLSeason}");
 
+        public async Task<NBATeamDetails?> GetNBATeamDetailAsync(string teamKey)
+        {
+            string key = teamKey.ToUpperInvariant();
+
+            var teamsTask = GetNBATeamsAsync();
+            var standingsTask = GetNBAStandingsAsync();
+            var playersTask = GetNBAPlayersAsync();
+            var gamesTask = GetNBAGamesAsync();
+
+            await Task.WhenAll(teamsTask, standingsTask, playersTask, gamesTask);
+
+            var team = teamsTask.Result.FirstOrDefault(t =>
+                t.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
+
+            if (team == null) return null;
+
+            var standing = standingsTask.Result.FirstOrDefault(s =>
+                s.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
+
+            var players = playersTask.Result
+                .Where(p => p.Team.Equals(key, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(p => p.LastName)
+                .ToList();
+
+            var games = gamesTask.Result
+                .Where(g => g.AwayTeam.Equals(key, StringComparison.OrdinalIgnoreCase) ||
+                            g.HomeTeam.Equals(key, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(g => g.DateTime)
+                .ToList();
+
+            return new NBATeamDetails
+            {
+                Team = team,
+                Standing = standing,
+                Players = players,
+                Games = games
+            };
+        }
+
+        public async Task<NFLTeamDetails?> GetNFLTeamDetailAsync(string teamKey)
+        {
+            string key = teamKey.ToUpperInvariant();
+
+            var teamsTask = GetNFLTeamsAsync();
+            var standingsTask = GetNFLStandingsAsync();
+            var playersTask = GetNFLPlayersAsync();
+            var gamesTask = GetNFLGamesAsync();
+
+            await Task.WhenAll(teamsTask, standingsTask, playersTask, gamesTask);
+
+            var team = teamsTask.Result.FirstOrDefault(t =>
+                t.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
+
+            if (team == null) return null;
+
+            var standing = standingsTask.Result.FirstOrDefault(s =>
+                s.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
+
+            var players = playersTask.Result
+                .Where(p => p.Team.Equals(key, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(p => p.LastName)
+                .ToList();
+
+            var games = gamesTask.Result
+                .Where(g => g.AwayTeam.Equals(key, StringComparison.OrdinalIgnoreCase) ||
+                            g.HomeTeam.Equals(key, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(g => g.Date)
+                .ToList();
+
+            return new NFLTeamDetails
+            {
+                Team = team,
+                Standing = standing,
+                Players = players,
+                Games = games
+            };
+        }
     }
 }
+    
+

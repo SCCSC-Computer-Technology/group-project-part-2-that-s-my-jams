@@ -128,6 +128,21 @@ namespace MVCSportsApp.Controllers
                 return StatusCode(502, new { error = "Failed to fetch NFL games", detail = ex.Message });
             }
         }
+
+        [HttpGet("teams/{key}/detail")]
+        public async Task<IActionResult> GetTeamDetail(string key)
+        {
+            try
+            {
+                var detail = await _sportsData.GetNFLTeamDetailAsync(key);
+                if (detail is null) return NotFound(new { error = $"Team '{key}' not found" });
+                return Ok(detail);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
     }
 }
 
