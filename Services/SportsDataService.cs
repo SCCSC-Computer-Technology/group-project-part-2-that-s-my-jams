@@ -129,16 +129,18 @@ namespace MVCSportsApp.Services
             if (team == null) return null;
 
             var standing = standingsTask.Result.FirstOrDefault(s =>
-                s.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
+                s.Team != null && s.Team.Equals(key, StringComparison.OrdinalIgnoreCase));
 
             var players = playersTask.Result
-                .Where(p => p.Team.Equals(key, StringComparison.OrdinalIgnoreCase))
+                // Added a check to ensure p.Team is not null before checking what it equals
+                .Where(p => p.Team != null && p.Team.Equals(key, StringComparison.OrdinalIgnoreCase))
                 .OrderBy(p => p.LastName)
                 .ToList();
 
             var games = gamesTask.Result
-                .Where(g => g.AwayTeam.Equals(key, StringComparison.OrdinalIgnoreCase) ||
-                            g.HomeTeam.Equals(key, StringComparison.OrdinalIgnoreCase))
+                // Added null checks for both AwayTeam and HomeTeam
+                .Where(g => (g.AwayTeam != null && g.AwayTeam.Equals(key, StringComparison.OrdinalIgnoreCase)) ||
+                            (g.HomeTeam != null && g.HomeTeam.Equals(key, StringComparison.OrdinalIgnoreCase)))
                 .OrderBy(g => g.Date)
                 .ToList();
 

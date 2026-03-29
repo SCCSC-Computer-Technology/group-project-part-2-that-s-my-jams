@@ -2,16 +2,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MVCSportsApp.Models;
 using System.Diagnostics;
+using MVCSportsApp.Services;
 
 namespace MVCSportsApp.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger _logger;
+        private readonly SportsDataService _sportsData;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, SportsDataService sportsData)
         {
             _logger = logger;
+            _sportsData = sportsData;
             
         }
         public IActionResult Index()
@@ -26,6 +29,14 @@ namespace MVCSportsApp.Controllers
 
         public IActionResult NBA()
         {
+            // Just returns the empty HTML shell. JavaScript does the rest!
+            return View();
+        }
+
+        //addNFL method to return the NFL view
+        public IActionResult NFL()
+        {
+            // Just returns the empty HTML shell. JavaScript does the rest!
             return View();
         }
 
