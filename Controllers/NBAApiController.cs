@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MVCSportsApp.Models.NBA;
 using MVCSportsApp.Services;
 
 namespace MVCSportsApp.Controllers
@@ -166,6 +167,48 @@ namespace MVCSportsApp.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("players/search")]
+        public async Task<IActionResult> SearchPlayers(string query)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(query)) return Ok(new List<NBAPlayer>());
+
+                // 1. Get the players AND the stats
+                var allPlayers = await _sportsData.GetNBAPlayersAsync();
+                var allStats = await _sportsData.GetNBAPlayerSeasonStatsAsync();
+
+                // 2. Filter the players by the search query
+                var filtered = allPlayers
+                    .Where(p => (p.FirstName + " " + p.LastName)
+                    .Contains(query, StringComparison.OrdinalIgnoreCase))
+                    .Take(20)
+                    .ToList();
+
+                // 3. THE MERGE: Attach stats to the search results
+                if (allStats != null)
+                {
+                    foreach (var p in filtered)
+                    {
+                        var s = allStats.FirstOrDefault(stat => stat.PlayerID == p.PlayerID);
+                        if (s != null)
+                        {
+                            // Using the casting we fixed earlier
+                            p.Points = (double)s.Points;
+                            p.Rebounds = (double)s.Rebounds;
+                            p.Assists = (double)s.Assists;
+                        }
+                    }
+                }
+
+                return Ok(filtered);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Search failed", detail = ex.Message });
             }
         }
 

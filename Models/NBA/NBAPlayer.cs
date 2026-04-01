@@ -52,7 +52,7 @@ namespace MVCSportsApp.Models.NBA
         [JsonProperty("Experience")]
         public int? Experience { get; set; }
 
-        // --- Stats merged from the Controller ---
+        // Stats merged from the Controller
         public double Points { get; set; } = 0;
         public double Rebounds { get; set; } = 0;
         public double Assists { get; set; } = 0;
