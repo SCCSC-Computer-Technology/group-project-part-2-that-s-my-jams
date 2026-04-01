@@ -8,7 +8,6 @@
     <div class="col-xs-12 col-md-3 team-list">
         <ul class="list-group" id="teams">
         </ul>
-
     </div>
     <div class="col-xs-12 col-md-9">
         <ul class="nav nav-tabs" id="teamTabs" role="tablist">
@@ -40,140 +39,51 @@
                         </div>
                     </div>
                 </div>
-
             </div>
+            
             <div class="tab-pane fade mt-2 data-table" id="games-tab-pane" role="tabpanel" aria-labelledby="games-tab" tabindex="0">
                 <table class="table table-striped table-hover table-bordered">
                     <thead>
                         <tr>
-                            <th>
-                                Game Date
-                            </th>
-                            <th>
-                                Teams
-                            </th>
-                            <th>
-                                Final Score
-                            </th>
+                            <th>Game Date</th>
+                            <th>Teams</th>
+                            <th>Final Score</th>
                         </tr>
                     </thead>
                     <tbody id="games-body">
                         <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
+                            <td colspan="3" class="text-center text-muted"><em>Loading games...</em></td>
                         </tr>
                     </tbody>
                 </table>
-
             </div>
+            
             <div class="tab-pane fade mt-2 data-table" id="players-tab-pane" role="tabpanel" aria-labelledby="players-tab" tabindex="0">
                 <table class="table table-striped table-hover table-bordered">
                     <thead>
                         <tr>
-                            <th>
-                                Player Name
-                            </th>
-                            <th>
-                                Player Position
-                            </th>
-                            <th>
-                                Player Number
-                            </th>
+                            <th>Player Name</th>
+                            <th>Position</th>
+                            <th>Number</th>
+                            <th>Ht / Wt</th>
+                            <th>Experience</th>
+                            <th>College</th>
+                            <th>Key Stats</th>
                         </tr>
                     </thead>
                     <tbody id="players-body">
                         <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
+                            <td colspan="7" class="text-center text-muted">
+                                <em>Loading roster data...</em>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-
             </div>
-
         </div>
     </div>
 </div>
+
 <script>
     var teamList = document.getElementById('teams');
     var html = '';
@@ -245,7 +155,7 @@
                        + '<td>' + aScore + ' - ' + hScore + '</td></tr>';
             }
         }
-        document.getElementById('games-body').innerHTML = gHtml || '<tr><td colspan="3">No games</td></tr>';
+        document.getElementById('games-body').innerHTML = gHtml || '<tr><td colspan="3" class="text-center">No games</td></tr>';
         
         // players loop
         var pHtml = '';
@@ -261,14 +171,53 @@
                 var lName = p.lastName || p.LastName || p.name || p.Name || 'Unknown';
                 var pos = p.position || p.Position || '-';
 
+                var height = p.height || p.Height || '-';
+                var weight = p.weight || p.Weight || '-';
+                var college = p.college || p.College || p.collegeDraftTeam || '-';
+                
+                var exp = p.experience || p.Experience || '-';
+                if (exp === 0 || exp === '0' || exp === 'R') {
+                    exp = 'Rookie';
+                }
+
+                // Dynamic Key Stats based on Position
+                var statsString = '-';
+                
+                if (pos === 'QB') 
+                {
+                    var passYds = p.passingYards || p.PassingYards || 0;
+                    var passTDs = p.passingTouchdowns || p.PassingTouchdowns || 0;
+                    statsString = passYds + ' Pass Yds, ' + passTDs + ' TD';
+                }
+                else if (pos === 'RB') 
+                {
+                    var rushYds = p.rushingYards || p.RushingYards || 0;
+                    var rushTDs = p.rushingTouchdowns || p.RushingTouchdowns || 0;
+                    statsString = rushYds + ' Rush Yds, ' + rushTDs + ' TD';
+                }
+                else if (pos === 'WR' || pos === 'TE') {
+                    var recYds = p.receivingYards || p.ReceivingYards || 0;
+                    var rec = p.receptions || p.Receptions || 0;
+                    statsString = rec + ' Rec, ' + recYds + ' Yds';
+                }
+                else if (['LB', 'CB', 'S', 'DB', 'DE', 'DT'].includes(pos)) {
+                    var tackles = p.tackles || p.Tackles || 0;
+                    var sacks = p.sacks || p.Sacks || 0;
+                    statsString = tackles + ' Tkls, ' + sacks + ' Sacks';
+                }
+
                 pHtml += '<tr>'
                        + '<td>' + fName + ' ' + lName + '</td>'
                        + '<td>' + pos + '</td>'
                        + '<td>#' + playerNum + '</td>'
+                       + '<td>' + height + ' / ' + weight + ' lbs</td>'
+                       + '<td>' + exp + '</td>'
+                       + '<td>' + college + '</td>'
+                       + '<td><strong>' + statsString + '</strong></td>'
                        + '</tr>';
             }
         }
-        document.getElementById('players-body').innerHTML = pHtml || '<tr><td colspan="3">No player data available</td></tr>';
+        document.getElementById('players-body').innerHTML = pHtml || '<tr><td colspan="7" class="text-center">No player data available</td></tr>';
 
     }
 </script>

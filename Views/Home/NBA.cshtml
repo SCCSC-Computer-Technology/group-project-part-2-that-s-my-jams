@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Sports Teams";
+    ViewData["Title"] = "NBA Teams";
 }
 
 <script src="~/js/sportsApi.js"></script>
@@ -8,7 +8,6 @@
     <div class="col-xs-12 col-md-3 team-list">
         <ul class="list-group" id="teams">
         </ul>
-      
     </div>
     <div class="col-xs-12 col-md-9">
         <ul class="nav nav-tabs" id="teamTabs" role="tablist">
@@ -40,144 +39,58 @@
                         </div>
                     </div>
                 </div>
-                
             </div>
+            
             <div class="tab-pane fade mt-2 data-table" id="games-tab-pane" role="tabpanel" aria-labelledby="games-tab" tabindex="0">
-                <table class="table table-striped table-hover table-bordered data-table" >
+                <table class="table table-striped table-hover table-bordered">
                     <thead>
                         <tr>
-                            <th>
-                                Game Date
-                            </th>
-                            <th>
-                                Teams
-                            </th>
-                            <th>
-                                Final Score
-                            </th>
+                            <th>Game Date</th>
+                            <th>Teams</th>
+                            <th>Final Score</th>
                         </tr>
                     </thead>
-                    <tbody id="games-body"> 
+                    <tbody id="games-body">
                         <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
+                            <td colspan="3" class="text-center text-muted"><em>Loading games...</em></td>
                         </tr>
                     </tbody>
                 </table>
-
             </div>
+            
             <div class="tab-pane fade mt-2 data-table" id="players-tab-pane" role="tabpanel" aria-labelledby="players-tab" tabindex="0">
-                <table class="table table-striped table-hover table-bordered ">
+                <table class="table table-striped table-hover table-bordered">
                     <thead>
                         <tr>
-                            <th>
-                                Player Name
-                            </th>
-                            <th>
-                                Player Position
-                            </th>
-                            <th>
-                                Player Number
-                            </th>
+                            <th>Player Name</th>
+                            <th>Position</th>
+                            <th>Number</th>
+                            <th>Ht / Wt</th>
+                            <th>Experience</th>
+                            <th>College</th>
+                            <th>Key Stats</th>
                         </tr>
                     </thead>
                     <tbody id="players-body">
                         <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
-                            </td>
-                            <td>
-                                add data
+                            <td colspan="7" class="text-center text-muted">
+                                <em>Loading roster data...</em>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-
             </div>
-            
         </div>
     </div>
 </div>
-<script>//placeholder
+
+<script>
     var teamList = document.getElementById('teams');
     var html = '';
-    for (var i = 0; i < NBA_TEAM.length; i++) {
+    
+    // Assuming your JS array for basketball is named NBA_TEAM
+    for (var i = 0; i < NBA_TEAM.length; i++)
+    {
         var team = NBA_TEAM[i];
         html += '<a href="#" class="list-group-item list-group-item-action" data-key="' + team.key + '">'
               + '<img src="' + team.logo + '" class="img-thumbnail list-logo" />' + team.name + '</a>';
@@ -185,61 +98,110 @@
     teamList.innerHTML = html;
 
     var links = teamList.querySelectorAll('a');
-    for (var i = 0; i < links.length; i++) 
+    for (var i = 0; i < links.length; i++)
     {
-        links[i].addEventListener('click', function (e) 
+        links[i].addEventListener('click', function (e)
         {
             e.preventDefault();
             var all = teamList.querySelectorAll('a');
             for (var j = 0; j < all.length; j++) all[j].classList.remove('active');
             this.classList.add('active');
             loadTeamDetail(this.getAttribute('data-key'));
-        }); 
+        });
     }
 
-        // Automatically click the first team to load its details on page load
-    if (links.length > 0) 
+    if (links.length > 0)
     {
         links[0].click();
     }
 
-    async function loadTeamDetail(key) {
+    async function loadTeamDetail(key)
+    {
+        // Calling the NBA API instead of NFL
         var detail = await SportsApi.nba.getTeamDetail(key);
         if (!detail) return;
 
         var team = detail.team;
         var s = detail.standing;
-        // info tab, this uses the api called to display the information to the web
+        
+        // info tab
         document.getElementById('team-info-card').innerHTML =
-            '<p><strong>' + team.city + ' ' + team.name + '</strong></p>'
+            '<p><strong>' + (team.city || '') + ' ' + (team.name || '') + '</strong></p>'
           + '<p>Conference: ' + (team.conference || 'N/A') + '</p>'
           + '<p>Division: ' + (team.division || 'N/A') + '</p>'
           + (team.wikipediaLogoUrl ? '<img src="' + team.wikipediaLogoUrl + '" style="max-height:100px;" />' : '');
 
+        // standing tab
         document.getElementById('standing-card').innerHTML = s
             ? '<p><strong>Record:</strong> ' + s.wins + '-' + s.losses + '</p>'
             + '<p><strong>Win %:</strong> ' + (s.percentage * 100).toFixed(1) + '%</p>'
             + '<p><strong>Home:</strong> ' + s.homeWins + '-' + s.homeLosses + '</p>'
             + '<p><strong>Away:</strong> ' + s.awayWins + '-' + s.awayLosses + '</p>'
             : '<p>No standing data</p>';
-        //a simple for loop to search the games for that particular team
+
+        // games loop
         var gHtml = '';
-        for (var i = 0; i < detail.games.length; i++) {
-            var g = detail.games[i];
-            var date = g.dateTime ? new Date(g.dateTime).toLocaleDateString() : 'TBD';
-            gHtml += '<tr><td>' + date + '</td>'
-                   + '<td>' + (g.awayTeam || '') + ' @@ ' + (g.homeTeam || '') + '</td>'
-                   + '<td>' + (g.awayTeamScore || '-') + ' - ' + (g.homeTeamScore || '-') + '</td></tr>';
+        if (detail.games && detail.games.length > 0)
+        {
+            for (var i = 0; i < detail.games.length; i++)
+            {
+                var g = detail.games[i];
+                var rawDate = g.dateTime || g.Day || g.date;
+                var date = rawDate ? new Date(rawDate).toLocaleDateString() : 'TBD';
+     
+                // NBA API uses "TeamScore"
+                var aScore = (g.awayTeamScore !== null && g.awayTeamScore !== undefined) ? g.awayTeamScore : '-';
+                var hScore = (g.homeTeamScore !== null && g.homeTeamScore !== undefined) ? g.homeTeamScore : '-';
+
+                gHtml += '<tr><td>' + date + '</td>'
+                       + '<td>' + (g.awayTeam || '') + ' @@ ' + (g.homeTeam || '') + '</td>'
+                       + '<td>' + aScore + ' - ' + hScore + '</td></tr>';
+            }
         }
-        document.getElementById('games-body').innerHTML = gHtml || '<tr><td colspan="3">No games</td></tr>';
-        //for loop to find the players in the team
+        document.getElementById('games-body').innerHTML = gHtml || '<tr><td colspan="3" class="text-center">No games</td></tr>';
+        
+        // players loop
         var pHtml = '';
-        for (var i = 0; i < detail.players.length; i++) {
-            var p = detail.players[i];
-            pHtml += '<tr><td>' + (p.firstName || '') + ' ' + (p.lastName || '') + '</td>'
-                   + '<td>' + (p.position || '') + '</td>'
-                   + '<td>#' + (p.jersey || '-') + '</td></tr>';
+        if (detail.players && detail.players.length > 0)
+        {
+            for (var i = 0; i < detail.players.length; i++)
+            {
+                var p = detail.players[i];
+                if (!p) continue;
+
+                // NBA uses jersey instead of number
+                var playerNum = p.jersey || p.Jersey || p.number || '-';
+                var fName = p.firstName || p.FirstName || '';
+                var lName = p.lastName || p.LastName || p.name || p.Name || 'Unknown';
+                var pos = p.position || p.Position || '-';
+
+                var height = p.height || p.Height || '-';
+                var weight = p.weight || p.Weight || '-';
+                var college = p.college || p.College || p.collegeDraftTeam || '-';
+                
+                var exp = p.experience || p.Experience || '-';
+                if (exp === 0 || exp === '0' || exp === 'R') {
+                    exp = 'Rookie';
+                }
+
+                // NBA Universal Key Stats: Points, Rebounds, Assists
+                var pts = p.points || p.Points || p.pointsPerGame || 0;
+                var reb = p.rebounds || p.Rebounds || p.reboundsPerGame || 0;
+                var ast = p.assists || p.Assists || p.assistsPerGame || 0;
+                var statsString = pts + ' Pts, ' + reb + ' Reb, ' + ast + ' Ast';
+
+                pHtml += '<tr>'
+                       + '<td>' + fName + ' ' + lName + '</td>'
+                       + '<td>' + pos + '</td>'
+                       + '<td>#' + playerNum + '</td>'
+                       + '<td>' + height + ' / ' + weight + ' lbs</td>'
+                       + '<td>' + exp + '</td>'
+                       + '<td>' + college + '</td>'
+                       + '<td><strong>' + statsString + '</strong></td>'
+                       + '</tr>';
+            }
         }
-        document.getElementById('players-body').innerHTML = pHtml || '<tr><td colspan="3">No players</td></tr>';
-    } //4 liters of dr pepper later
+        document.getElementById('players-body').innerHTML = pHtml || '<tr><td colspan="7" class="text-center">No player data available</td></tr>';
+
+    }
 </script>

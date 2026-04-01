@@ -134,8 +134,33 @@ namespace MVCSportsApp.Controllers
         {
             try
             {
+                // 1. Get the base team details (which includes the roster)
                 var detail = await _sportsData.GetNBATeamDetailAsync(key);
                 if (detail is null) return NotFound(new { error = $"Team '{key}' not found" });
+
+                // 2. Fetch the stats for the season using your existing service
+                var allStats = await _sportsData.GetNBAPlayerSeasonStatsAsync();
+
+                // 3. THE MERGE: Use LINQ to match the stats to the correct players
+                // (Assuming your 'detail' object has a 'Players' property, which it should based on your JS)
+                if (detail.Players != null && allStats != null)
+                {
+                    foreach (var player in detail.Players)
+                    {
+                        // Find the stat line matching this specific PlayerID
+                        var pStats = allStats.FirstOrDefault(s => s.PlayerID == player.PlayerID);
+
+                        if (pStats != null)
+                        {
+                            // Assign the real stats! (The ?? 0 handles any nulls from the API)
+                            player.Points = (double)pStats.Points;
+                            player.Rebounds = (double)pStats.Rebounds;
+                            player.Assists = (double)pStats.Assists;
+                        }
+                    }
+                }
+
+                // 4. Send the fully loaded object to your JavaScript
                 return Ok(detail);
             }
             catch (Exception ex)
@@ -144,7 +169,7 @@ namespace MVCSportsApp.Controllers
             }
         }
 
-        
+
 
 
     }

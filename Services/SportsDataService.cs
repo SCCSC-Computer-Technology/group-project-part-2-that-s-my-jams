@@ -58,7 +58,7 @@ namespace MVCSportsApp.Services
         public Task<List<NBAStanding>> GetNBAStandingsAsync()
             => GetAsync<List<NBAStanding>>($"https://api.sportsdata.io/v3/nba/scores/json/Standings/{Year}");
         public Task<List<NBAPlayerSeasonStat>> GetNBAPlayerSeasonStatsAsync()
-           => GetAsync<List<NBAPlayerSeasonStat>>($"https://api.sportsdata.io/v3/nba/scores/json/PlayerSeasonStats/{Year}");
+           => GetAsync<List<NBAPlayerSeasonStat>>($"https://api.sportsdata.io/v3/nba/stats/json/PlayerSeasonStats/{Year}");
 
 
         //NFL Api endpoints
