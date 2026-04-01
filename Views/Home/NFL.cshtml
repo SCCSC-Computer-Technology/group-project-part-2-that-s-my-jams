@@ -47,13 +47,13 @@
                     <thead>
                         <tr>
                             <th>
-                                Game Data
+                                Game Date
                             </th>
                             <th>
-                                Game Data
+                                Teams
                             </th>
                             <th>
-                                Game Data
+                                Final Score
                             </th>
                         </tr>
                     </thead>
@@ -175,76 +175,100 @@
     </div>
 </div>
 <script>
-    //placeholder
-        var teamList = document.getElementById('teams');
-        var html = '';
-        for (var i = 0; i < NFL_TEAM.length; i++) 
-        {
-            var team = NFL_TEAM[i];
-            html += '<a href="#" class="list-group-item list-group-item-action" data-key="' + team.key + '">'
-                  + '<img src="' + team.logo + '" class="img-thumbnail list-logo" />' + team.name + '</a>';
-        }
-        teamList.innerHTML = html;
+    var teamList = document.getElementById('teams');
+    var html = '';
+    for (var i = 0; i < NFL_TEAM.length; i++)
+    {
+        var team = NFL_TEAM[i];
+        html += '<a href="#" class="list-group-item list-group-item-action" data-key="' + team.key + '">'
+              + '<img src="' + team.logo + '" class="img-thumbnail list-logo" />' + team.name + '</a>';
+    }
+    teamList.innerHTML = html;
 
-        var links = teamList.querySelectorAll('a');
-        for (var i = 0; i < links.length; i++)
+    var links = teamList.querySelectorAll('a');
+    for (var i = 0; i < links.length; i++)
+    {
+        links[i].addEventListener('click', function (e)
         {
-            links[i].addEventListener('click', function (e)
+            e.preventDefault();
+            var all = teamList.querySelectorAll('a');
+            for (var j = 0; j < all.length; j++) all[j].classList.remove('active');
+            this.classList.add('active');
+            loadTeamDetail(this.getAttribute('data-key'));
+        });
+    }
+
+    // Automatically click the first team to load its details on page load
+    if (links.length > 0)
+    {
+        links[0].click();
+    }
+
+    async function loadTeamDetail(key)
+    {
+        var detail = await SportsApi.nfl.getTeamDetail(key);
+        if (!detail) return;
+
+        var team = detail.team;
+        var s = detail.standing;
+        
+        // info tab
+        document.getElementById('team-info-card').innerHTML =
+            '<p><strong>' + (team.city || '') + ' ' + (team.name || '') + '</strong></p>'
+          + '<p>Conference: ' + (team.conference || 'N/A') + '</p>'
+          + '<p>Division: ' + (team.division || 'N/A') + '</p>'
+          + (team.wikipediaLogoUrl ? '<img src="' + team.wikipediaLogoUrl + '" style="max-height:100px;" />' : '');
+
+        // standing tab
+        document.getElementById('standing-card').innerHTML = s
+            ? '<p><strong>Record:</strong> ' + s.wins + '-' + s.losses + '</p>'
+            + '<p><strong>Win %:</strong> ' + (s.percentage * 100).toFixed(1) + '%</p>'
+            + '<p><strong>Home:</strong> ' + s.homeWins + '-' + s.homeLosses + '</p>'
+            + '<p><strong>Away:</strong> ' + s.awayWins + '-' + s.awayLosses + '</p>'
+            : '<p>No standing data</p>';
+
+        // games loop
+        var gHtml = '';
+        if (detail.games && detail.games.length > 0)
+        {
+            for (var i = 0; i < detail.games.length; i++)
             {
-                e.preventDefault();
-                var all = teamList.querySelectorAll('a');
-                for (var j = 0; j < all.length; j++) all[j].classList.remove('active');
-                this.classList.add('active');
-                loadTeamDetail(this.getAttribute('data-key'));
-            });
-        }
-
-            // Automatically click the first team to load its details on page load
-        if (links.length > 0)
-        {
-            links[0].click();
-        }
-
-        async function loadTeamDetail(key) 
-        {
-            var detail = await SportsApi.nfl.getTeamDetail(key);
-            if (!detail) return;
-
-            var team = detail.team;
-            var s = detail.standing;
-            // info tab, this uses the api called to display the information to the web
-            document.getElementById('team-info-card').innerHTML =
-                '<p><strong>' + team.city + ' ' + team.name + '</strong></p>'
-              + '<p>Conference: ' + (team.conference || 'N/A') + '</p>'
-              + '<p>Division: ' + (team.division || 'N/A') + '</p>'
-              + (team.wikipediaLogoUrl ? '<img src="' + team.wikipediaLogoUrl + '" style="max-height:100px;" />' : '');
-
-            document.getElementById('standing-card').innerHTML = s
-                ? '<p><strong>Record:</strong> ' + s.wins + '-' + s.losses + '</p>'
-                + '<p><strong>Win %:</strong> ' + (s.percentage * 100).toFixed(1) + '%</p>'
-                + '<p><strong>Home:</strong> ' + s.homeWins + '-' + s.homeLosses + '</p>'
-                + '<p><strong>Away:</strong> ' + s.awayWins + '-' + s.awayLosses + '</p>'
-                : '<p>No standing data</p>';
-            //a simple for loop to search the games for that particular team
-            var gHtml = '';
-            for (var i = 0; i < detail.games.length; i++) {
                 var g = detail.games[i];
-                var date = g.dateTime ? new Date(g.dateTime).toLocaleDateString() : 'TBD';
+                var rawDate = g.date || g.dateTime || g.Day;
+                var date = rawDate ? new Date(rawDate).toLocaleDateString() : 'TBD';
+     
+                var aScore = (g.awayScore !== null && g.awayScore !== undefined) ? g.awayScore : '-';
+                var hScore = (g.homeScore !== null && g.homeScore !== undefined) ? g.homeScore : '-';
+
                 gHtml += '<tr><td>' + date + '</td>'
                        + '<td>' + (g.awayTeam || '') + ' @@ ' + (g.homeTeam || '') + '</td>'
-                       + '<td>' + (g.awayTeamScore || '-') + ' - ' + (g.homeTeamScore || '-') + '</td></tr>';
+                       + '<td>' + aScore + ' - ' + hScore + '</td></tr>';
             }
-            document.getElementById('games-body').innerHTML = gHtml || '<tr><td colspan="3">No games</td></tr>';
-            //for loop to find the players in the team
-            var pHtml = '';
-            for (var i = 0; i < detail.players.length; i++) 
+        }
+        document.getElementById('games-body').innerHTML = gHtml || '<tr><td colspan="3">No games</td></tr>';
+        
+        // players loop
+        var pHtml = '';
+        if (detail.players && detail.players.length > 0)
+        {
+            for (var i = 0; i < detail.players.length; i++)
             {
                 var p = detail.players[i];
+                if (!p) continue;
 
-                pHtml += '<tr><td>' + (p.firstName || '') + ' ' + (p.lastName || '') + '</td>'
-                       + '<td>' + (p.position || '') + '</td>'
-                       + '<td>#' + (p.jersey || '-') + '</td></tr>';
+                var playerNum = p.number || p.Number || '-';
+                var fName = p.firstName || p.FirstName || '';
+                var lName = p.lastName || p.LastName || p.name || p.Name || 'Unknown';
+                var pos = p.position || p.Position || '-';
+
+                pHtml += '<tr>'
+                       + '<td>' + fName + ' ' + lName + '</td>'
+                       + '<td>' + pos + '</td>'
+                       + '<td>#' + playerNum + '</td>'
+                       + '</tr>';
             }
-            document.getElementById('players-body').innerHTML = pHtml || '<tr><td colspan="3">No players</td></tr>';
-        } //4 liters of dr pepper later
+        }
+        document.getElementById('players-body').innerHTML = pHtml || '<tr><td colspan="3">No player data available</td></tr>';
+
+    }
 </script>
