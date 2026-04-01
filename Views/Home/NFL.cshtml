@@ -6,9 +6,13 @@
 
 <div class="row mt-5">
     <div class="col-xs-12 col-md-3 team-list">
-        <ul class="list-group" id="teams">
+        <div class="mb-3">
+            <input type="text" id="nflTeamSearch" class="form-control" placeholder="Search NFL teams (e.g. Chiefs)..." autocomplete="off">
+        </div>
+        <ul class="list-group" id="nflTeams">
         </ul>
     </div>
+
     <div class="col-xs-12 col-md-9">
         <ul class="nav nav-tabs" id="teamTabs" role="tablist">
             <li class="nav-item" role="presentation">
@@ -21,22 +25,15 @@
                 <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#players-tab-pane" type="button" role="tab" aria-controls="players-tab-pane" aria-selected="false">Players</button>
             </li>
         </ul>
+
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane fade show active" id="info-tab-pane" role="tabpanel" aria-labelledby="info-tab-pane" tabindex="0">
                 <div class="row mt-4">
                     <div class="col">
-                        <div class="card">
-                            <div class="card-body" id="team-info-card">
-                                Select a Team
-                            </div>
-                        </div>
+                        <div class="card"><div class="card-body" id="team-info-card">Select a Team</div></div>
                     </div>
                     <div class="col">
-                        <div class="card">
-                            <div class="card-body" id="standing-card">
-                                select a team
-                            </div>
-                        </div>
+                        <div class="card"><div class="card-body" id="standing-card">Select a Team</div></div>
                     </div>
                 </div>
             </div>
@@ -51,9 +48,7 @@
                         </tr>
                     </thead>
                     <tbody id="games-body">
-                        <tr>
-                            <td colspan="3" class="text-center text-muted"><em>Loading games...</em></td>
-                        </tr>
+                        <tr><td colspan="3" class="text-center text-muted"><em>Loading games...</em></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -72,11 +67,7 @@
                         </tr>
                     </thead>
                     <tbody id="players-body">
-                        <tr>
-                            <td colspan="7" class="text-center text-muted">
-                                <em>Loading roster data...</em>
-                            </td>
-                        </tr>
+                        <tr><td colspan="7" class="text-center text-muted"><em>Loading roster data...</em></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -85,51 +76,63 @@
 </div>
 
 <script>
-    var teamList = document.getElementById('teams');
-    var html = '';
-    for (var i = 0; i < NFL_TEAM.length; i++)
-    {
-        var team = NFL_TEAM[i];
-        html += '<a href="#" class="list-group-item list-group-item-action" data-key="' + team.key + '">'
-              + '<img src="' + team.logo + '" class="img-thumbnail list-logo" />' + team.name + '</a>';
-    }
-    teamList.innerHTML = html;
+    var nflTeamList = document.getElementById('nflTeams');
+    var nflSearchInput = document.getElementById('nflTeamSearch');
 
-    var links = teamList.querySelectorAll('a');
-    for (var i = 0; i < links.length; i++)
-    {
-        links[i].addEventListener('click', function (e)
-        {
-            e.preventDefault();
-            var all = teamList.querySelectorAll('a');
-            for (var j = 0; j < all.length; j++) all[j].classList.remove('active');
-            this.classList.add('active');
-            loadTeamDetail(this.getAttribute('data-key'));
+    // Sidebar Logic: Filters and Renders the list
+    function renderNFLTeams(filter = '') {
+        var html = '';
+        var filteredTeams = NFL_TEAM.filter(function(team) {
+            return team.name.toLowerCase().includes(filter.toLowerCase()) ||
+                   team.key.toLowerCase().includes(filter.toLowerCase());
         });
+
+        for (var i = 0; i < filteredTeams.length; i++) {
+            var team = filteredTeams[i];
+            // Uses your original exact HTML string format
+            html += '<a href="#" class="list-group-item list-group-item-action" data-key="' + team.key + '">'
+                  + '<img src="' + team.logo + '" class="img-thumbnail list-logo" />' + team.name + '</a>';
+        }
+        
+        nflTeamList.innerHTML = html || '<div class="list-group-item text-muted text-center">No teams found</div>';
+        attachNFLLinkListeners();
     }
 
-    // Automatically click the first team to load its details on page load
-    if (links.length > 0)
-    {
-        links[0].click();
+    // Click Logic: Handles selecting a team
+    function attachNFLLinkListeners() {
+        var links = nflTeamList.querySelectorAll('a');
+        for (var i = 0; i < links.length; i++) {
+            links[i].addEventListener('click', function (e) {
+                e.preventDefault();
+                var all = nflTeamList.querySelectorAll('a');
+                for (var j = 0; j < all.length; j++) all[j].classList.remove('active');
+                this.classList.add('active');
+                loadTeamDetail(this.getAttribute('data-key'));
+            });
+        }
     }
 
-    async function loadTeamDetail(key)
-    {
+    // Search Trigger: Updates as you type
+    nflSearchInput.addEventListener('input', function(e) {
+        renderNFLTeams(e.target.value);
+    });
+
+    // Main Data Loader: Fetches API data
+    async function loadTeamDetail(key) {
         var detail = await SportsApi.nfl.getTeamDetail(key);
         if (!detail) return;
 
         var team = detail.team;
         var s = detail.standing;
         
-        // info tab
+        // Populate Info
         document.getElementById('team-info-card').innerHTML =
             '<p><strong>' + (team.city || '') + ' ' + (team.name || '') + '</strong></p>'
           + '<p>Conference: ' + (team.conference || 'N/A') + '</p>'
           + '<p>Division: ' + (team.division || 'N/A') + '</p>'
           + (team.wikipediaLogoUrl ? '<img src="' + team.wikipediaLogoUrl + '" style="max-height:100px;" />' : '');
 
-        // standing tab
+        // Populate Standings
         document.getElementById('standing-card').innerHTML = s
             ? '<p><strong>Record:</strong> ' + s.wins + '-' + s.losses + '</p>'
             + '<p><strong>Win %:</strong> ' + (s.percentage * 100).toFixed(1) + '%</p>'
@@ -137,16 +140,13 @@
             + '<p><strong>Away:</strong> ' + s.awayWins + '-' + s.awayLosses + '</p>'
             : '<p>No standing data</p>';
 
-        // games loop
+        // Populate Games
         var gHtml = '';
-        if (detail.games && detail.games.length > 0)
-        {
-            for (var i = 0; i < detail.games.length; i++)
-            {
+        if (detail.games && detail.games.length > 0) {
+            for (var i = 0; i < detail.games.length; i++) {
                 var g = detail.games[i];
                 var rawDate = g.date || g.dateTime || g.Day;
                 var date = rawDate ? new Date(rawDate).toLocaleDateString() : 'TBD';
-     
                 var aScore = (g.awayScore !== null && g.awayScore !== undefined) ? g.awayScore : '-';
                 var hScore = (g.homeScore !== null && g.homeScore !== undefined) ? g.homeScore : '-';
 
@@ -157,67 +157,39 @@
         }
         document.getElementById('games-body').innerHTML = gHtml || '<tr><td colspan="3" class="text-center">No games</td></tr>';
         
-        // players loop
+        // Populate Players with Dynamic Stats
         var pHtml = '';
-        if (detail.players && detail.players.length > 0)
-        {
-            for (var i = 0; i < detail.players.length; i++)
-            {
+        if (detail.players && detail.players.length > 0) {
+            for (var i = 0; i < detail.players.length; i++) {
                 var p = detail.players[i];
                 if (!p) continue;
 
-                var playerNum = p.number || p.Number || '-';
-                var fName = p.firstName || p.FirstName || '';
-                var lName = p.lastName || p.LastName || p.name || p.Name || 'Unknown';
                 var pos = p.position || p.Position || '-';
-
-                var height = p.height || p.Height || '-';
-                var weight = p.weight || p.Weight || '-';
-                var college = p.college || p.College || p.collegeDraftTeam || '-';
-                
-                var exp = p.experience || p.Experience || '-';
-                if (exp === 0 || exp === '0' || exp === 'R') {
-                    exp = 'Rookie';
-                }
-
-                // Dynamic Key Stats based on Position
                 var statsString = '-';
                 
-                if (pos === 'QB') 
-                {
-                    var passYds = p.passingYards || p.PassingYards || 0;
-                    var passTDs = p.passingTouchdowns || p.PassingTouchdowns || 0;
-                    statsString = passYds + ' Pass Yds, ' + passTDs + ' TD';
-                }
-                else if (pos === 'RB') 
-                {
-                    var rushYds = p.rushingYards || p.RushingYards || 0;
-                    var rushTDs = p.rushingTouchdowns || p.RushingTouchdowns || 0;
-                    statsString = rushYds + ' Rush Yds, ' + rushTDs + ' TD';
-                }
-                else if (pos === 'WR' || pos === 'TE') {
-                    var recYds = p.receivingYards || p.ReceivingYards || 0;
-                    var rec = p.receptions || p.Receptions || 0;
-                    statsString = rec + ' Rec, ' + recYds + ' Yds';
-                }
-                else if (['LB', 'CB', 'S', 'DB', 'DE', 'DT'].includes(pos)) {
-                    var tackles = p.tackles || p.Tackles || 0;
-                    var sacks = p.sacks || p.Sacks || 0;
-                    statsString = tackles + ' Tkls, ' + sacks + ' Sacks';
-                }
+                if (pos === 'QB') statsString = (p.passingYards || 0) + ' Pass Yds, ' + (p.passingTouchdowns || 0) + ' TD';
+                else if (pos === 'RB') statsString = (p.rushingYards || 0) + ' Rush Yds, ' + (p.rushingTouchdowns || 0) + ' TD';
+                else if (pos === 'WR' || pos === 'TE') statsString = (p.receptions || 0) + ' Rec, ' + (p.receivingYards || 0) + ' Yds';
+                else if (['LB', 'CB', 'S', 'DB', 'DE', 'DT'].includes(pos)) statsString = (p.tackles || 0) + ' Tkls, ' + (p.sacks || 0) + ' Sacks';
 
                 pHtml += '<tr>'
-                       + '<td>' + fName + ' ' + lName + '</td>'
+                       + '<td>' + (p.firstName || '') + ' ' + (p.lastName || 'Unknown') + '</td>'
                        + '<td>' + pos + '</td>'
-                       + '<td>#' + playerNum + '</td>'
-                       + '<td>' + height + ' / ' + weight + ' lbs</td>'
-                       + '<td>' + exp + '</td>'
-                       + '<td>' + college + '</td>'
+                       + '<td>#' + (p.number || '-') + '</td>'
+                       + '<td>' + (p.height || '-') + ' / ' + (p.weight || '-') + ' lbs</td>'
+                       + '<td>' + (p.experience == 0 ? 'Rookie' : p.experience) + '</td>'
+                       + '<td>' + (p.college || '-') + '</td>'
                        + '<td><strong>' + statsString + '</strong></td>'
                        + '</tr>';
             }
         }
         document.getElementById('players-body').innerHTML = pHtml || '<tr><td colspan="7" class="text-center">No player data available</td></tr>';
-
     }
+
+    // Initial Load
+    renderNFLTeams();
+    setTimeout(function() {
+        var first = nflTeamList.querySelector('a');
+        if (first) first.click();
+    }, 250);
 </script>
